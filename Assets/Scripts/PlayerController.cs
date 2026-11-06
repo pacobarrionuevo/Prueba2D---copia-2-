@@ -13,6 +13,22 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private Transform groundCheck;
     [SerializeField] private LayerMask groundLayer;
 
+    public static PlayerController Instance;
+    public int numberCoins = 0;
+
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
+
     // Update is called once per frame
     void Update()
     {
@@ -57,4 +73,11 @@ public class PlayerController : MonoBehaviour
     {
         return Physics2D.OverlapCircle(groundCheck.position, 0.2f, groundLayer);
     }
-}
+
+    public void AddCoin()
+    {
+        numberCoins++;
+        UIManager.Instance.UpdateCoinText(numberCoins);
+    }
+
+} ///////////////

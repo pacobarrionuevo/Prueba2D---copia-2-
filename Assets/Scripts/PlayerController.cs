@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
@@ -16,6 +17,16 @@ public class PlayerController : MonoBehaviour
     public static PlayerController Instance;
     public int numberCoins = 0;
 
+    /// //////////
+    private bool canDash = true;
+    private bool isDashing;
+    private float dashingPower = 24f;
+    private float dashTime = 0.2f;
+    private float dashCooldown = 1f;
+
+    [SerializeField] private TrailRenderer tr;
+
+
     private void Awake()
     {
         if (Instance == null)
@@ -32,9 +43,11 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (isDashing) return;
         Move();
         Jump();
         Flip();
+        CanDash();
     }
 
     private void Move()
@@ -78,6 +91,38 @@ public class PlayerController : MonoBehaviour
     {
         numberCoins++;
         UIManager.Instance.UpdateCoinText(numberCoins);
+    }
+
+    private void CanDash()
+    {
+        if (Input.GetKeyDown(KeyCode.LeftShift) && canDash)
+        {
+            StartCoroutine(Dash());
+        }
+    }
+
+    public IEnumerator Dash()
+    {
+        canDash = false;
+        isDashing = true;
+
+        float originalGravity = rb.gravityScale;
+        rb.gravityScale = 0f;
+
+        rb.velocity = new Vector2(dashingPower * transform.localScale.x, 0f);
+
+        tr.emitting = true;
+
+        yield return new WaitForSeconds(dashTime);
+
+        tr.emitting = false;
+
+        rb.gravityScale = originalGravity;
+        isDashing = false;
+
+        yield return new WaitForSeconds(dashCooldown);
+
+        canDash = true;
     }
 
 } ///////////////
